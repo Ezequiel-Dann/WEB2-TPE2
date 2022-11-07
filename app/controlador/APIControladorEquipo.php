@@ -78,7 +78,14 @@ class APIControladorEquipo{
                     $this->vista->response("no existe el grupo",404);
                 }
             }else{
-                $equipos = $this->modelo->obtenerEquipos();
+                $order="asc";
+                if(isset($_GET["sort"]) and $this->columnaValida()){
+                    if(isset($_GET["order"]) and $_GET["order"] == "desc"){ // TODO convertir a minuscula o mayuscula
+                        $order=$_GET["order"];
+                    }
+                }
+                $equipos = $this->modelo->obtenerEquipos(null, $_GET["sort"], $order);// TODO arreglar get sort no seteado
+               // $equipos = $this->modelo->obtenerEquipos();
                 if($equipos){
                     $status = 200;
                 }else{
@@ -121,7 +128,7 @@ class APIControladorEquipo{
 
         $agregado = $this->modelo->agregarEquipo($equipo);
         if($agregado){
-            $this->vista->response($agregado,200);           //devuelve el id con el que se inserto
+            $this->vista->response($agregado,201);           //devuelve el id con el que se inserto
         }else{
             $this->vista->response("Error al agregar",500);  //se rompio la base de datos
         };
@@ -142,6 +149,17 @@ class APIControladorEquipo{
             isset($_POST["gf"]) and (!empty($_POST["gf"]) or $_POST["gf"] == "0") and is_numeric($_POST["gf"]) and
             isset($_POST["pais"]) and !empty($_POST["pais"])
         );
+
+        
+    }
+    private function columnaValida(){
+        $columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
+        if(in_array($_GET["sort"], $columnas)){
+            return true;
+        }
+        echo "donde ta";
+        return false;
+
     }
 
 }
