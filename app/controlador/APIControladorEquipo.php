@@ -1,7 +1,6 @@
 <?php
 
     require_once "./app/modelo/ModeloEquipo.php";
-    require_once "./app/modelo/ModeloGrupo.php";
     require_once "./app/vista/APIVistaEquipo.php";
 
 class APIControladorEquipo{
@@ -11,7 +10,7 @@ class APIControladorEquipo{
 
     public function __construct(){
         $this->modelo = new ModeloEquipo();
-        $this->modeloGrupo = new ModeloGrupo();
+        //$this->modeloGrupo = new ModeloGrupo();
         $this->vista = new APIVistaEquipo();
     }
 
@@ -50,15 +49,18 @@ class APIControladorEquipo{
 
     public function obtenerEquipo($params=null){
 
-        if(!empty($params[":ID"])){
-            //pide equipo por id            
+        if(!empty($params[":ID"])){          //TODO  hacer el ORDEN
             if(is_numeric($params[":ID"])){
-
                 $equipos = $this->modelo->obtenerEquipos($params[":ID"]);
 
+                if($equipos){
+                    $status = 200;
+                }else{
+                    $status = 404;
+                }
+                $this->vista->response($equipos,$status);
             }else{
                 $this->vista->response("no es id",400);
-                return;
             }
         }else{
             //puede ser mas de un equipo
@@ -74,7 +76,7 @@ class APIControladorEquipo{
                     return;
                 }
 
-                $order = "asc"; //direccion por defecto si hay un sort
+                $order = "ASC"; //direccion por defecto si hay un sort
             }
             if (isset($_GET["order"])){
                 $order = strtoupper($_GET["order"]);  //para que no se rompa con mayusculas
@@ -86,34 +88,38 @@ class APIControladorEquipo{
             }
             
             if(!empty($_GET["grupo"])){
-                //pide los equipos de un grupoo
-                $grupo = $this->modeloGrupo->obtenerGrupo($_GET["grupo"]);
+                $grupo = $this->modeloGrupo->obtenerGrupoPorNombre();
 
                 if($grupo){
-                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id_grupo,$sort,$order);
+                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id);
+                    if($equipos){
+                        $status = 200;
+                    }else{
+                        $status = 404;
+                    }
+                    $this->vista->response($equipos,$status);
                 }else{
-                    $this->vista->response("No existe el grupo",404);
-                    return;
+                    $this->vista->response("no existe el grupo",404);
                 }
             }else{
-                //todos los equipos
-                $equipos = $this->modelo->obtenerEquipos(null, $sort, $order);
+                $order="asc";
+                if(isset($_GET["sort"]) and $this->columnaValida()){
+                    if(isset($_GET["order"]) and $_GET["order"] == "desc"){ // TODO convertir a minuscula o mayuscula
+                        $order=$_GET["order"];
+                    }
+                }
+                $equipos = $this->modelo->obtenerEquipos(null, $_GET["sort"], $order);// TODO arreglar get sort no seteado
+               // $equipos = $this->modelo->obtenerEquipos();
+                if($equipos){
+                    $status = 200;
+                }else{
+                    $status = 404;
+                }
+                $this->vista->response($equipos,$status);
             }
+
         }
 
-        //aca llega si pudo hacer la consulta
-
-        if($equipos){
-            $status = 200;
-        }else{
-            $status = 404;
-        }
-        $this->vista->response($equipos,$status);
-
-    }
-
-    public function obtenerEquiposGrupo($params=null){
-        var_dump($params);
     }
 
     public function nuevoEquipo(){
@@ -166,12 +172,12 @@ class APIControladorEquipo{
 
         
     }
-    private function columnaValida($sort){
+    private function columnaValida(){
         $columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
-
-        if(in_array($sort, $columnas)){
+        if(in_array($_GET["sort"], $columnas)){
             return true;
         }
+        echo "donde ta";
         return false;
 
     }
