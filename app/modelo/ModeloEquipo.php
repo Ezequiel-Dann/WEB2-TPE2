@@ -69,7 +69,7 @@
         }
 
         private function stringOrderByCompletoSQL($order){
-            $orderOpuesto = (strtolower($order) == "asc") ? "desc": "asc" ;
+            $orderOpuesto = ($order == "ASC") ? "DESC": "ASC" ;
             return "ORDER BY puntos $order, pj $orderOpuesto, pg $order, gf $order ,dif $order";
         }
     }
