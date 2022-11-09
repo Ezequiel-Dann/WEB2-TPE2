@@ -100,6 +100,7 @@ class APIControladorEquipo{
             }else{
                 //todos los equipos
                 $equipos = $this->modelo->obtenerEquipos(null, $sort, $order);
+                //holi
             }
         }
 
