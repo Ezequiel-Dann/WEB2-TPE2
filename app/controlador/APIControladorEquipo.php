@@ -67,7 +67,7 @@ class APIControladorEquipo{
             $sort = null;
 
             if (isset($_GET["sort"])) {
-                $sort = strtolower($_GET["sort"]);
+                $sort = strtoupper($_GET["sort"]);
 
                 if (!$this->columnaValida($sort)) {
                     $this->vista->response("Sort Invalido", 400);
@@ -77,14 +77,12 @@ class APIControladorEquipo{
                 $order = "asc"; //direccion por defecto si hay un sort
             }
             if (isset($_GET["order"])){
-                $order = strtolower($_GET["order"]);  //para que no se rompa con mayusculas
+                $order = strtoupper($_GET["order"]);  //para que no se rompa con mayusculas
 
                 if (!$this->esOrderValido($order))  { //check si es asc o desc
                     $this->vista->response("Order Invalido", 400);
                     return;
                 }
-                
-                $order = $_GET["order"];
             }
             
             if(!empty($_GET["grupo"])){
@@ -179,7 +177,7 @@ class APIControladorEquipo{
     }
 
     private function esOrderValido($string){
-        return (strtolower($string) == "desc") or (strtolower($string)=="asc");
+        return $string == "DESC" or $string=="ASC";
     }
 
 }
