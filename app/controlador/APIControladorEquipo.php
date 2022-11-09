@@ -102,20 +102,9 @@ class APIControladorEquipo{
                     $this->vista->response("no existe el grupo",404);
                 }
             }else{
-                $order="asc";
-                if(isset($_GET["sort"]) and $this->columnaValida()){
-                    if(isset($_GET["order"]) and $_GET["order"] == "desc"){ // TODO convertir a minuscula o mayuscula
-                        $order=$_GET["order"];
-                    }
-                }
-                $equipos = $this->modelo->obtenerEquipos(null, $_GET["sort"], $order);// TODO arreglar get sort no seteado
-               // $equipos = $this->modelo->obtenerEquipos();
-                if($equipos){
-                    $status = 200;
-                }else{
-                    $status = 404;
-                }
-                $this->vista->response($equipos,$status);
+                //todos los equipos
+                $equipos = $this->modelo->obtenerEquipos(null, $sort, $order);
+                //holi
             }
 
         }
