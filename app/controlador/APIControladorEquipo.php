@@ -1,6 +1,7 @@
 <?php
 
     require_once "./app/modelo/ModeloEquipo.php";
+    require_once "./app/modelo/ModeloGrupo.php";
     require_once "./app/vista/APIVistaEquipo.php";
 
 class APIControladorEquipo{
@@ -10,7 +11,7 @@ class APIControladorEquipo{
 
     public function __construct(){
         $this->modelo = new ModeloEquipo();
-        //$this->modeloGrupo = new ModeloGrupo();
+        $this->modeloGrupo = new ModeloGrupo();
         $this->vista = new APIVistaEquipo();
     }
 
@@ -49,18 +50,15 @@ class APIControladorEquipo{
 
     public function obtenerEquipo($params=null){
 
-        if(!empty($params[":ID"])){          //TODO  hacer el ORDEN
+        if(!empty($params[":ID"])){
+            //pide equipo por id            
             if(is_numeric($params[":ID"])){
+
                 $equipos = $this->modelo->obtenerEquipos($params[":ID"]);
 
-                if($equipos){
-                    $status = 200;
-                }else{
-                    $status = 404;
-                }
-                $this->vista->response($equipos,$status);
             }else{
                 $this->vista->response("no es id",400);
+                return;
             }
         }else{
             //puede ser mas de un equipo
@@ -69,46 +67,56 @@ class APIControladorEquipo{
             $sort = null;
 
             if (isset($_GET["sort"])) {
-                $sort = strtoupper($_GET["sort"]);
+                $sort = strtolower($_GET["sort"]);
 
                 if (!$this->columnaValida($sort)) {
                     $this->vista->response("Sort Invalido", 400);
                     return;
                 }
 
-                $order = "ASC"; //direccion por defecto si hay un sort
+                $order = "asc"; //direccion por defecto si hay un sort
             }
             if (isset($_GET["order"])){
-                $order = strtoupper($_GET["order"]);  //para que no se rompa con mayusculas
+                $order = strtolower($_GET["order"]);  //para que no se rompa con mayusculas
 
                 if (!$this->esOrderValido($order))  { //check si es asc o desc
                     $this->vista->response("Order Invalido", 400);
                     return;
                 }
+                
+                $order = $_GET["order"];
             }
             
             if(!empty($_GET["grupo"])){
-                $grupo = $this->modeloGrupo->obtenerGrupoPorNombre();
+                //pide los equipos de un grupoo
+                $grupo = $this->modeloGrupo->obtenerGrupo($_GET["grupo"]);
 
                 if($grupo){
-                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id);
-                    if($equipos){
-                        $status = 200;
-                    }else{
-                        $status = 404;
-                    }
-                    $this->vista->response($equipos,$status);
+                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id_grupo,$sort,$order);
                 }else{
-                    $this->vista->response("no existe el grupo",404);
+                    $this->vista->response("No existe el grupo",404);
+                    return;
                 }
             }else{
                 //todos los equipos
                 $equipos = $this->modelo->obtenerEquipos(null, $sort, $order);
                 //holi
             }
-
         }
 
+        //aca llega si pudo hacer la consulta
+
+        if($equipos){
+            $status = 200;
+        }else{
+            $status = 404;
+        }
+        $this->vista->response($equipos,$status);
+
+    }
+
+    public function obtenerEquiposGrupo($params=null){
+        var_dump($params);
     }
 
     public function nuevoEquipo(){
@@ -161,18 +169,18 @@ class APIControladorEquipo{
 
         
     }
-    private function columnaValida(){
+    private function columnaValida($sort){
         $columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
-        if(in_array($_GET["sort"], $columnas)){
+
+        if(in_array($sort, $columnas)){
             return true;
         }
-        echo "donde ta";
         return false;
 
     }
 
     private function esOrderValido($string){
-        return $string == "DESC" or $string=="ASC";
+        return (strtolower($string) == "desc") or (strtolower($string)=="asc");
     }
 
 }
