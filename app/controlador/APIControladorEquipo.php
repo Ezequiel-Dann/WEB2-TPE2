@@ -47,7 +47,6 @@ class APIControladorEquipo{
         $this->vista->response($equipos, $status);
 
     }*/
-
     public function obtenerEquipo($params=null){
 
         if(!empty($params[":ID"])){
@@ -66,25 +65,19 @@ class APIControladorEquipo{
             $order = null;
             $sort = null;
 
+            
+            if (!$this->parametrosValidos()){
+                return;
+            }
+           
+
             if (isset($_GET["sort"])) {
                 $sort = strtolower($_GET["sort"]);
-
-                if (!$this->columnaValida($sort)) {
-                    $this->vista->response("Sort Invalido", 400);
-                    return;
-                }
-
                 $order = "asc"; //direccion por defecto si hay un sort
             }
             if (isset($_GET["order"])){
-                $order = strtolower($_GET["order"]);  //para que no se rompa con mayusculas
 
-                if (!$this->esOrderValido($order))  { //check si es asc o desc
-                    $this->vista->response("Order Invalido", 400);
-                    return;
-                }
-                
-                $order = $_GET["order"];
+                $order = strtoupper($_GET["order"]);  //para que no se rompa con mayusculas     
             }
             
             if(!empty($_GET["grupo"])){
@@ -180,7 +173,45 @@ class APIControladorEquipo{
     }
 
     private function esOrderValido($string){
-        return (strtolower($string) == "desc") or (strtolower($string)=="asc");
+        return $string == "DESC" or $string=="ASC";
     }
 
-}
+
+    private function parametrosValidos(){
+        $valido = true;
+        $parametrosinvalidos = [];
+        foreach ($_GET as $key => $value) {
+            switch(strtolower($key)){
+
+                case "sort":{
+                    if (!$this->columnaValida(strtolower($value))) {
+                        array_push($parametrosinvalidos,$value);
+                        $valido = false;
+                    }
+                    break;
+                }
+
+                case "order":{
+                    if (!$this->esOrderValido(strtoupper($value)))  { //check si es asc o desc
+                        array_push($parametrosinvalidos,$value);
+                        $valido = false;
+                    }
+                    break;
+                }
+
+                case "grupo":break;
+
+                case "resource":break;
+                default:{
+                    array_push($parametrosinvalidos,$key);
+                    $valido = false;
+                }
+            }
+        }
+        if(!$valido){
+            $this->vista->response($parametrosinvalidos, 400); // devuelve clave o valor del parametro invalido
+            return false;
+        }
+        return true;
+    }
+} 
