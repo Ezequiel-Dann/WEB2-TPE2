@@ -64,8 +64,11 @@ class APIControladorEquipo{
             //configurar ordenamiento
             $order = null;
             $sort = null;
-
+            $limit = null;
+            $offset = 0;
             
+            $_GET = array_change_key_case ($_GET,CASE_LOWER);
+                        
             if (!$this->parametrosValidos()){
                 return;
             }
@@ -79,20 +82,27 @@ class APIControladorEquipo{
 
                 $order = strtoupper($_GET["order"]);  //para que no se rompa con mayusculas     
             }
+            if(isset($_GET["limit"])){
+                $limit = intval($_GET["limit"]);
+            }
+            if(isset($_GET["offset"])){
+                $offset = intval($_GET["offset"]);
+            }
+            var_dump($_GET);
             
             if(!empty($_GET["grupo"])){
                 //pide los equipos de un grupoo
                 $grupo = $this->modeloGrupo->obtenerGrupo($_GET["grupo"]);
 
                 if($grupo){
-                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id_grupo,$sort,$order);
+                    $equipos = $this->modelo->obtenerEquiposGrupo($grupo->id_grupo,$sort,$order,$limit,$offset);
                 }else{
                     $this->vista->response("No existe el grupo",404);
                     return;
                 }
             }else{
                 //todos los equipos
-                $equipos = $this->modelo->obtenerEquipos(null, $sort, $order);
+                $equipos = $this->modelo->obtenerEquipos(null, $sort, $order, $limit, $offset);
                 //holi
             }
         }
@@ -181,6 +191,7 @@ class APIControladorEquipo{
         $valido = true;
         $parametrosinvalidos = [];
         foreach ($_GET as $key => $value) {
+            $key = strtolower($key);
             switch(strtolower($key)){
 
                 case "sort":{
@@ -198,6 +209,19 @@ class APIControladorEquipo{
                     }
                     break;
                 }
+                case "limit":{
+                    if(($value <= 0) or ($value > 10) or (!is_numeric($value))){
+                        $valido=false;
+                    }
+                    break;
+                }
+                
+                case "offset":{
+                    if(($value < 0) or (!is_numeric($value) or !isset($_GET["limit"]))){
+                        $valido=false;
+                    }
+                    break;
+                }
 
                 case "grupo":break;
 
@@ -206,6 +230,7 @@ class APIControladorEquipo{
                     array_push($parametrosinvalidos,$key);
                     $valido = false;
                 }
+               
             }
         }
         if(!$valido){

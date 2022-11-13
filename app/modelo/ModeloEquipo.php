@@ -7,7 +7,7 @@
             $this->db = new PDO('mysql:host=localhost;'.'dbname=db_catar;charset=utf8', 'root', '');
         }
    
-        public function obtenerEquipos($id = null , $sort = null , $order = null){
+        public function obtenerEquipos($id = null , $sort = null , $order = null , $limit = null , $offset = null){
             if (isset($id)){
                 //un solo equipo
                 $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE id_equipo = ? and (fk_id_grupo = id_grupo)");
@@ -20,9 +20,15 @@
                 $stringOrderBySQL = $this->stringOrderByCompletoSQL($order);
             }else{ //sino segun los parametros
                 $stringOrderBySQL = $sort ? " ORDER BY $sort $order" : "";
-            }
+            }//." LIMIT ". $limit . " OFFSET " .$offset
 
-            $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE equipos.fk_id_grupo = grupos.id_grupo " . $stringOrderBySQL); // esto es  legal?
+            if($limit){
+
+                $paginado = $this->paginado($limit, $offset);
+
+            }else{$paginado =" ";}
+
+            $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE equipos.fk_id_grupo = grupos.id_grupo " . $stringOrderBySQL . $paginado); // esto es  legal?
             var_dump($stringOrderBySQL);
             var_dump($sentencia);  //TODO sacar
             $sentencia->execute();
@@ -30,14 +36,21 @@
             return $sentencia->fetchALL(PDO::FETCH_OBJ);
         }
 
-        public function obtenerEquiposGrupo($grupo, $sort = null, $order = null){
+        public function obtenerEquiposGrupo($grupo, $sort = null, $order = null, $limit = null, $offset = null){
 
             if(!$sort and $order){ // si solo viene la direccion ordena como para hacer la tabla
                 $stringOrderBySQL = $this->stringOrderbyCompletoSQL($order);
             }else{ //sino segun los parametros
                 $stringOrderBySQL = $sort ? " ORDER BY $sort $order" : "";
             }
-            $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE equipos.fk_id_grupo = grupos.id_grupo AND grupos.id_grupo = ?" . $stringOrderBySQL);
+
+            if($limit){
+
+                $paginado = $this->paginado($limit, $offset);
+
+            }else{$paginado =" ";}
+            
+            $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE equipos.fk_id_grupo = grupos.id_grupo AND grupos.id_grupo = ?" . $stringOrderBySQL . " " . $paginado);
             $sentencia->execute([$grupo]);
             return $sentencia->fetchALL(PDO::FETCH_OBJ);
         }
@@ -71,5 +84,8 @@
         private function stringOrderByCompletoSQL($order){
             $orderOpuesto = ($order == "ASC") ? "DESC": "ASC" ;
             return "ORDER BY puntos $order, pj $orderOpuesto, pg $order, gf $order ,dif $order";
+        }
+        private function paginado($limit, $offset){
+            return $paginado = "LIMIT " . $limit . " OFFSET " . $offset;
         }
     }
