@@ -3,6 +3,7 @@
 require_once "./libs/Router.php";
 require_once "./app/Controlador/APIControladorEquipo.php";
 require_once "./app/controlador/APIControladorGrupo.php";
+require_once "./app/controlador/APIControladorAuth.php";
 define("BASE_URL", 'http://'.$_SERVER["SERVER_NAME"].':'.$_SERVER["SERVER_PORT"].dirname($_SERVER["PHP_SELF"]).'/');
 
 
@@ -18,6 +19,8 @@ $router->addRoute('equipos/:ID', 'DELETE', 'APIControladorEquipo', 'borrarEquipo
 
 $router->addRoute('grupos/', 'GET', 'APIControladorGrupo', 'obtenerGrupo');
 $router->addRoute('grupos/:ID', 'GET', 'APIControladorGrupo', 'obtenerGrupo');
+
+$router->addRoute("auth/token", 'GET', 'APIControladorAuth', 'obtenerToken');
 
 // rutea
 $router->route($_GET["resource"], $_SERVER['REQUEST_METHOD']);

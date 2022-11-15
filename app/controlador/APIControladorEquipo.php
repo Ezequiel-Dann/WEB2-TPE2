@@ -3,16 +3,20 @@
     require_once "./app/modelo/ModeloEquipo.php";
     require_once "./app/modelo/ModeloGrupo.php";
     require_once "./app/vista/APIVista.php";
+    require_once "./app/helpers/auth-api-helper.php";
 
 class APIControladorEquipo{
 
     private $modelo;
     private $vista;
+    private $authHelper;
+    private $modeloGrupo;
 
     public function __construct(){
         $this->modelo = new ModeloEquipo();
         $this->modeloGrupo = new ModeloGrupo();
         $this->vista = new APIVista();
+        $this->authHelper = new AuthApiHelper();
         define("CAMPOS",['pais','pp','puntos','pj','pe','gc','fk_id_grupo','pg','dif','gf']);
     }
 
@@ -49,6 +53,11 @@ class APIControladorEquipo{
 
     }*/
     public function obtenerEquipo($params=null){
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->vista->response("No estas logeado", 401);
+            return;
+        }
 
         if(!empty($params[":ID"])){
             //pide equipo por id            
@@ -120,7 +129,18 @@ class APIControladorEquipo{
 
 
     public function nuevoEquipo(){
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->vista->response("No estas logeado", 401);
+            return;
+        }
+        if(!$this->authHelper->esAdmin()){
+            $this->vista->response("Permisos Insuficientes",403);
+            return;
+        }
+
         $data = json_decode(file_get_contents("php://input"));
+
         if(!$this->verificarDatosEquipo($data)){
             $this->vista->response("Datos invalidos",400);
             return;
@@ -157,7 +177,18 @@ class APIControladorEquipo{
     }
 
     public function borrarEquipo($params){
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->vista->response("No estas logeado", 401);
+            return;
+        }
+        if(!$this->authHelper->esAdmin()){
+            $this->vista->response("Permisos Insuficientes",403);
+            return;
+        }
+
         if (!empty($params[":ID"]) and is_numeric($params[":ID"])) {  
+            
             $borrado = $this->modelo->eliminarEquipo($params[":ID"]);
 
             if ($borrado){
@@ -197,13 +228,13 @@ class APIControladorEquipo{
         
     }
     private function columnaValida($sort){
-        if(in_array($sort,CAMPOS)){
-            return true;
-        }
         /*$columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
         if(in_array($sort, $columnas)){
             return true;
         }*/
+        if(in_array($sort,CAMPOS)){
+            return true;
+        }
         return false;
 
     }
@@ -277,11 +308,12 @@ class APIControladorEquipo{
         $valido = true;
         $evaluaciones = $this->evaluaciones();
         $parametrosinvalidos = [];
+
         foreach ($_GET as $key => $value) {
             $key = strtolower($key);
-            if(!array_key_exists($key,$evaluaciones) or !$evaluaciones[$key]($value)){ 
+
+            if(!array_key_exists($key,$evaluaciones) or !$evaluaciones[$key]($value)){
                 $valido = false;
-                echo "entro";
                 $parametrosinvalidos[$key] = $value;
             }
         }
