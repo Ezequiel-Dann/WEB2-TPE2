@@ -235,6 +235,10 @@ class APIControladorEquipo{
         if(in_array($sort,CAMPOS)){
             return true;
         }
+        /*$columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
+        if(in_array($sort, $columnas)){
+            return true;
+        }*/
         return false;
 
     }
