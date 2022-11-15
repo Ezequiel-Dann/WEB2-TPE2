@@ -1,6 +1,6 @@
 <?php
 
-class APIVistaEquipo {
+class APIVista {
 
     public function __construct()
     {

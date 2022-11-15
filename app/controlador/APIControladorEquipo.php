@@ -2,7 +2,7 @@
 
     require_once "./app/modelo/ModeloEquipo.php";
     require_once "./app/modelo/ModeloGrupo.php";
-    require_once "./app/vista/APIVistaEquipo.php";
+    require_once "./app/vista/APIVista.php";
 
 class APIControladorEquipo{
 
@@ -12,7 +12,7 @@ class APIControladorEquipo{
     public function __construct(){
         $this->modelo = new ModeloEquipo();
         $this->modeloGrupo = new ModeloGrupo();
-        $this->vista = new APIVistaEquipo();
+        $this->vista = new APIVista();
     }
 
     /*public function obtenerEquipo($params=null){
@@ -120,27 +120,29 @@ class APIControladorEquipo{
 
 
     public function nuevoEquipo(){
-
-        if(!$this->verificarDatosEquipo()){
+        $data = json_decode(file_get_contents("php://input"));
+        if(!$this->verificarDatosEquipo($data)){
             $this->vista->response("Datos invalidos",400);
             return;
         }
-        if(!$this->modeloGrupo->obtenerGrupo($_POST["grupo"])){
+        if(!$this->modeloGrupo->obtenerGrupo($data->grupo)){
             $this->vista->response("No existe el grupo",404);
             return;
         }
-
+        
+        var_dump($data);
+        var_dump($data);
         $equipo = array(
-            ":pp" => $_POST["pp"],
-            ":puntos" => $_POST["puntos"],
-            ":pj" => $_POST["pj"],
-            ":pe" => $_POST["pe"],
-            ":pais" => $_POST["pais"],
-            ":gc" => $_POST["gc"],
-            ":pg" => $_POST["pg"],
-            ":dif" => $_POST["dif"],
-            ":gf" => $_POST["gf"],
-            ":fk_id_grupo" => $_POST["grupo"],
+            ":pp" => $data->pp,
+            ":puntos" => $data->puntos,
+            ":pj" => $data->pj,
+            ":pe" => $data->pe,
+            ":pais" => $data->pais,
+            ":gc" => $data->gc,
+            ":pg" => $data->pg,
+            ":dif" => $data->dif,
+            ":gf" => $data->gf,
+            ":fk_id_grupo" => $data->grupo,
         );
 
         $agregado = $this->modelo->agregarEquipo($equipo);
@@ -153,18 +155,18 @@ class APIControladorEquipo{
 
     }
 
-    private function verificarDatosEquipo(){
+    private function verificarDatosEquipo($data){
         return (
-            isset($_POST["pp"]) and (!empty($_POST["pp"]) or $_POST["pp"] == "0") and is_numeric($_POST["pp"]) and
-            isset($_POST["puntos"]) and (!empty($_POST["puntos"]) or $_POST["puntos"] == "0") and is_numeric($_POST["puntos"]) and
-            isset($_POST["pj"]) and (!empty($_POST["pj"]) or $_POST["pj"] == "0") and is_numeric($_POST["pj"]) and
-            isset($_POST["pe"]) and (!empty($_POST["pe"]) or $_POST["pe"] == "0") and is_numeric($_POST["pe"]) and
-            isset($_POST["gc"]) and (!empty($_POST["gc"]) or $_POST["gc"] == "0") and is_numeric($_POST["gc"]) and
-            isset($_POST["grupo"]) and (!empty($_POST["grupo"]) or $_POST["grupo"] == "0") and is_numeric($_POST["grupo"]) and
-            isset($_POST["pg"]) and (!empty($_POST["pg"]) or $_POST["pg"] == "0") and is_numeric($_POST["pg"]) and
-            isset($_POST["dif"]) and (!empty($_POST["dif"]) or $_POST["dif"] == "0") and is_numeric($_POST["dif"]) and
-            isset($_POST["gf"]) and (!empty($_POST["gf"]) or $_POST["gf"] == "0") and is_numeric($_POST["gf"]) and
-            isset($_POST["pais"]) and !empty($_POST["pais"])
+            isset($data->pp) and (!empty($data->pp) or $data->pp == "0") and is_numeric($data->pp) and
+            isset($data->puntos) and (!empty($data->puntos) or $data->puntos == "0") and is_numeric($data->puntos) and
+            isset($data->pj) and (!empty($data->pj) or $data->pj == "0") and is_numeric($data->pj) and
+            isset($data->pe) and (!empty($data->pe) or $data->pe == "0") and is_numeric($data->pe) and
+            isset($data->gc) and (!empty($data->gc) or $data->gc == "0") and is_numeric($data->gc) and
+            isset($data->grupo) and (!empty($data->grupo) or $data->grupo == "0") and is_numeric($data->grupo) and
+            isset($data->pg) and (!empty($data->pg) or $data->pg == "0") and is_numeric($data->pg) and
+            isset($data->dif) and (!empty($data->dif) or $data->dif == "0") and is_numeric($data->dif) and
+            isset($data->gf) and (!empty($data->gf) or $data->gf == "0") and is_numeric($data->gf) and
+            isset($data->pais) and !empty($data->pais)
         );
 
         
