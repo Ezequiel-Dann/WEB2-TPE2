@@ -118,9 +118,6 @@ class APIControladorEquipo{
 
     }
 
-    public function obtenerEquiposGrupo($params=null){
-        var_dump($params);
-    }
 
     public function nuevoEquipo(){
 
@@ -128,7 +125,7 @@ class APIControladorEquipo{
             $this->vista->response("Datos invalidos",400);
             return;
         }
-        if(!$this->controladorGrupo->obtenerGrupo($_POST["grupo"])){
+        if(!$this->modeloGrupo->obtenerGrupo($_POST["grupo"])){
             $this->vista->response("No existe el grupo",404);
             return;
         }
