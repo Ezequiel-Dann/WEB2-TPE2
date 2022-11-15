@@ -15,6 +15,11 @@ class APIControladorGrupo{
     }
 
     public function obtenerGrupo($params=null){
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->vista->response("No estas logeado", 401);
+            return;
+        }
         
         if(!empty($params[":ID"])){         
             if(is_numeric($params[":ID"])){
