@@ -13,6 +13,7 @@ class APIControladorEquipo{
         $this->modelo = new ModeloEquipo();
         $this->modeloGrupo = new ModeloGrupo();
         $this->vista = new APIVista();
+        define("CAMPOS",['pais','pp','puntos','pj','pe','gc','fk_id_grupo','pg','dif','gf']);
     }
 
     /*public function obtenerEquipo($params=null){
@@ -56,7 +57,7 @@ class APIControladorEquipo{
                 $equipos = $this->modelo->obtenerEquipos($params[":ID"]);
 
             }else{
-                $this->vista->response("no es id",400);
+                $this->vista->response("ID invalido",400);
                 return;
             }
         }else{
@@ -69,7 +70,7 @@ class APIControladorEquipo{
             
             $_GET = array_change_key_case ($_GET,CASE_LOWER);
                         
-            if (!$this->parametrosValidos()){
+            if (!$this->parametrosValidos2()){
                 return;
             }
            
@@ -88,7 +89,6 @@ class APIControladorEquipo{
             if(isset($_GET["offset"])){
                 $offset = intval($_GET["offset"]);
             }
-            var_dump($_GET);
             
             if(!empty($_GET["grupo"])){
                 //pide los equipos de un grupoo
@@ -125,14 +125,16 @@ class APIControladorEquipo{
             $this->vista->response("Datos invalidos",400);
             return;
         }
-        if(!$this->modeloGrupo->obtenerGrupo($data->grupo)){
+        if(!$this->modeloGrupo->obtenerGrupo($data->fk_id_grupo)){
             $this->vista->response("No existe el grupo",404);
             return;
         }
-        
-        var_dump($data);
-        var_dump($data);
-        $equipo = array(
+
+        $equipo = [];
+        foreach (CAMPOS as $columna) {
+            $equipo[":".$columna] = $data->$columna;
+        }
+        /*$equipo = array(
             ":pp" => $data->pp,
             ":puntos" => $data->puntos,
             ":pj" => $data->pj,
@@ -143,8 +145,7 @@ class APIControladorEquipo{
             ":dif" => $data->dif,
             ":gf" => $data->gf,
             ":fk_id_grupo" => $data->grupo,
-        );
-
+        );*/
         $agregado = $this->modelo->agregarEquipo($equipo);
         if($agregado){
             $this->vista->response($agregado,201);           //devuelve el id con el que se inserto
@@ -155,8 +156,32 @@ class APIControladorEquipo{
 
     }
 
+    public function borrarEquipo($params){
+        if (!empty($params[":ID"]) and is_numeric($params[":ID"])) {  
+            $borrado = $this->modelo->eliminarEquipo($params[":ID"]);
+
+            if ($borrado){
+                $this->vista->response("Equipo eliminado exitosamente",200);
+                return;
+            }
+            $this->vista->response("El equipo no existe",200);
+            return;
+        }
+        $this->vista->response("ID invalido", 400);
+    }
+
     private function verificarDatosEquipo($data){
-        return (
+
+
+        $valido = true;
+        foreach (CAMPOS as  $value) {
+            if( !(isset($data->$value) and (!empty($data->$value)) and (is_numeric($data->$value) or $value="pais"))){
+                $valido = false;
+            }
+        }
+
+        return $valido;
+        /*return (
             isset($data->pp) and (!empty($data->pp) or $data->pp == "0") and is_numeric($data->pp) and
             isset($data->puntos) and (!empty($data->puntos) or $data->puntos == "0") and is_numeric($data->puntos) and
             isset($data->pj) and (!empty($data->pj) or $data->pj == "0") and is_numeric($data->pj) and
@@ -167,16 +192,18 @@ class APIControladorEquipo{
             isset($data->dif) and (!empty($data->dif) or $data->dif == "0") and is_numeric($data->dif) and
             isset($data->gf) and (!empty($data->gf) or $data->gf == "0") and is_numeric($data->gf) and
             isset($data->pais) and !empty($data->pais)
-        );
+        );*/
 
         
     }
     private function columnaValida($sort){
-        $columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
-
-        if(in_array($sort, $columnas)){
+        if(in_array($sort,CAMPOS)){
             return true;
         }
+        /*$columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
+        if(in_array($sort, $columnas)){
+            return true;
+        }*/
         return false;
 
     }
@@ -195,7 +222,7 @@ class APIControladorEquipo{
 
                 case "sort":{
                     if (!$this->columnaValida(strtolower($value))) {
-                        array_push($parametrosinvalidos,$value);
+                        $parametrosinvalidos[$key] = $value;
                         $valido = false;
                     }
                     break;
@@ -203,13 +230,14 @@ class APIControladorEquipo{
 
                 case "order":{
                     if (!$this->esOrderValido(strtoupper($value)))  { //check si es asc o desc
-                        array_push($parametrosinvalidos,$value);
+                        $parametrosinvalidos[$key] = $value;
                         $valido = false;
                     }
                     break;
                 }
                 case "limit":{
                     if(($value <= 0) or ($value > 10) or (!is_numeric($value))){
+                        $parametrosinvalidos[$key] = $value;
                         $valido=false;
                     }
                     break;
@@ -217,25 +245,62 @@ class APIControladorEquipo{
                 
                 case "offset":{
                     if(($value < 0) or (!is_numeric($value) or !isset($_GET["limit"]))){
+                        $parametrosinvalidos[$key] = $value;
                         $valido=false;
                     }
                     break;
                 }
 
-                case "grupo":break;
+                case "grupo":{
+                    if(!is_numeric($value)){
+                        $parametrosinvalidos[$key] = $value;
+                        $valido=false;
+                    }
+                    break;
+                }
 
                 case "resource":break;
                 default:{
-                    array_push($parametrosinvalidos,$key);
+                    $parametrosinvalidos[$key] = $value;
                     $valido = false;
                 }
                
             }
         }
         if(!$valido){
-            $this->vista->response($parametrosinvalidos, 400); // devuelve clave o valor del parametro invalido
+            $this->vista->response($parametrosinvalidos, 400); // devuelve clave valor del parametro invalido
             return false;
         }
         return true;
+    }
+    private function parametrosValidos2(){
+        $valido = true;
+        $evaluaciones = $this->evaluaciones();
+        $parametrosinvalidos = [];
+        foreach ($_GET as $key => $value) {
+            $key = strtolower($key);
+            if(!array_key_exists($key,$evaluaciones) or !$evaluaciones[$key]($value)){ 
+                $valido = false;
+                echo "entro";
+                $parametrosinvalidos[$key] = $value;
+            }
+        }
+        if(!$valido){
+            $this->vista->response($parametrosinvalidos, 400); // devuelve clave valor del parametro invalido
+            return false;
+        }
+        return $valido;
+    }
+
+    private function evaluaciones(){
+        $evaluaciones = [];
+        $evaluaciones["limit"] = function ($limit){return ($limit > 0) and ($limit <= 10) and (is_numeric($limit));};
+        $evaluaciones["order"] = function ($order){return $this->esOrderValido(strtoupper($order));};
+        $evaluaciones["grupo"] = function ($grupo){return is_numeric($grupo);};
+        $evaluaciones["offset"] = function($offset){return $offset >= 0 and is_numeric($offset) and isset($_GET["limit"]);};
+        $evaluaciones["sort"] = function ($sort){return $this->columnaValida(strtolower($sort));};
+        $evaluaciones["resource"] = function($resource){return true;};
+
+        return $evaluaciones;
     }
 } 
