@@ -28,7 +28,7 @@ class AuthApiHelper {
 
     function isLoggedIn(){
         $payload = $this->getToken();
-        var_dump($payload);
+       
         if(isset($payload->email))
             return true;
         else

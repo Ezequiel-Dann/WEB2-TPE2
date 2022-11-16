@@ -3,15 +3,18 @@
     require_once "./app/modelo/ModeloEquipo.php";
     require_once "./app/modelo/ModeloGrupo.php";
     require_once "./app/vista/APIVista.php";
+    require_once "./app/helpers/auth-api-helper.php";
 
 class APIControladorGrupo{
 
     private $modeloGrupo;
     private $vista;
+    private $authHelper;
 
     public function __construct(){
         $this->modeloGrupo = new ModeloGrupo();
         $this->vista = new APIVista();
+        $this->authHelper = new AuthApiHelper();
     }
 
     public function obtenerGrupo($params=null){

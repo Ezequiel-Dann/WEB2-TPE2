@@ -29,8 +29,6 @@
             }else{$paginado =" ";}
 
             $sentencia = $this->db->prepare("SELECT id_equipo,pais,puntos,pj,pg,pe,pp,gf,gc,dif,nombre as grupo FROM (equipos INNER JOIN grupos) WHERE equipos.fk_id_grupo = grupos.id_grupo " . $stringOrderBySQL . $paginado); // esto es  legal?
-            var_dump($stringOrderBySQL);
-            var_dump($sentencia);  //TODO sacar
             $sentencia->execute();
             
             return $sentencia->fetchALL(PDO::FETCH_OBJ);
@@ -83,7 +81,7 @@
 
         private function stringOrderByCompletoSQL($order){
             $orderOpuesto = ($order == "ASC") ? "DESC": "ASC" ;
-            return "ORDER BY puntos $order, pj $orderOpuesto, pg $order, gf $order ,dif $order";
+            return "ORDER BY puntos $order, pg $order, pj $orderOpuesto, gf $order ,dif $order";
         }
         private function paginado($limit, $offset){
             return $paginado = "LIMIT " . $limit . " OFFSET " . $offset;

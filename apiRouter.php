@@ -12,7 +12,6 @@ $router = new Router();
 $router->addRoute('equipos/', 'GET', 'APIControladorEquipo', 'obtenerEquipo');
 $router->addRoute('equipos/:ID', 'GET', 'APIControladorEquipo', 'obtenerEquipo');
 $router->addRoute('equipos/', 'POST', 'APIControladorEquipo', 'nuevoEquipo');
-$router->addRoute('equipos/:ID', 'PUT', 'APIControladorEquipo', 'modificarEquipo');
 $router->addRoute('equipos/:ID', 'DELETE', 'APIControladorEquipo', 'borrarEquipo');
 
 

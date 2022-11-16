@@ -79,7 +79,7 @@ class APIControladorEquipo{
             
             $_GET = array_change_key_case ($_GET,CASE_LOWER);
                         
-            if (!$this->parametrosValidos2()){
+            if (!$this->parametrosValidos()){
                 return;
             }
            
@@ -140,9 +140,11 @@ class APIControladorEquipo{
         }
 
         $data = json_decode(file_get_contents("php://input"));
+        
 
         if(!$this->verificarDatosEquipo($data)){
             $this->vista->response("Datos invalidos",400);
+            
             return;
         }
         if(!$this->modeloGrupo->obtenerGrupo($data->fk_id_grupo)){
@@ -195,7 +197,7 @@ class APIControladorEquipo{
                 $this->vista->response("Equipo eliminado exitosamente",200);
                 return;
             }
-            $this->vista->response("El equipo no existe",200);
+            $this->vista->response("El equipo no existe",404);
             return;
         }
         $this->vista->response("ID invalido", 400);
@@ -248,7 +250,7 @@ class APIControladorEquipo{
     }
 
 
-    private function parametrosValidos(){
+    /*private function parametrosValidos(){
         $valido = true;
         $parametrosinvalidos = [];
         foreach ($_GET as $key => $value) {
@@ -307,8 +309,8 @@ class APIControladorEquipo{
             return false;
         }
         return true;
-    }
-    private function parametrosValidos2(){
+    }*/
+    private function parametrosValidos(){
         $valido = true;
         $evaluaciones = $this->evaluaciones();
         $parametrosinvalidos = [];
