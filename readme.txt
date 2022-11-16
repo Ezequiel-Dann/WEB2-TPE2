@@ -15,18 +15,20 @@ Para utilizar este enpoint se necesita un token de auntenticacion OAuth2.0.
 Este endpoint funciona por GET y puede recibir o no diferentes parametros.
 
 Los parametros que acepta por GET son:
-grupo: tiene que ser numero (id).
-sort: tiene que ser una columna valida de la base de datos.
-order: tiene que ser asc o desc. Si order esta presente pero sort no, el orden se hace de la siguiente manera:
-1º puntos,
-2º partidos ganados (pg),
-3º partidos jugados (pj). los partidos jugados se ordenan de forma opuesta al resto,
-porque caunto mas partidos jugados tenga mas abajo es su posicion en la tabla,
-4º goles a favor (gf),
-5º diferencia de goles (dif).
 
-limit: tiene que ser un numero mayor estricto que 0 y menor igual a 10.
-offset: tiene que ser un numero mayor o igual a 0 y es obligacion tener un limit.
+grupo: tiene que ser numero (id), filtra los equipos por grupo.
+sort: tiene que ser una columna valida de la base de datos, ordena por dicha columna.
+order: tiene que ser asc o desc, la direccion en la que se ordenan los registros. Si order esta presente pero sort no, el orden se hace de la siguiente manera:
+    1º puntos,
+    2º partidos ganados (pg),
+    3º partidos jugados (pj). los partidos jugados se ordenan de forma opuesta al resto,
+        porque caunto mas partidos jugados tenga mas abajo es su posicion en la tabla,
+    4º goles a favor (gf),
+    5º diferencia de goles (dif).
+
+limit: tiene que ser un numero mayor estricto que 0 y menor igual a 10, cantidad de equipos en la respuesta.
+offset: tiene que ser un numero mayor o igual a 0 y es obligacion tener un limit, cantidad de equipos a ignorar antes de empezar a obtener registros.
+
 En caso de que los parametros ingresados sean incorrectos: devuelve clave valor del parametro invalido.
 Si la consulta es correcta este endpoint genera un arreglo de json con los datos de cada equipo,
 
@@ -115,13 +117,6 @@ Si la consulta se realiza con exito devuelve un arreglo de json con todos los gr
     nombre: string,
     finalizado: boolean (0/1)
 
-Ejemplos:http://localhost/WEB2-TPE2/api/grupos/ 
-
-{
-        "id_grupo": 6,
-        "nombre": "A",
-        "finalizado": 1
-    },
 
 (6) obtener grupo por id ('grupos/:ID', 'GET')
 Para utilizar este enpoint se necesita un token de auntenticacion OAuth2.0.
@@ -133,6 +128,12 @@ Si la consulta se realiza con exito devuelve un json de el grupo y su informacio
     nombre: string,
     finalizado: boolean (0/1)
 
+Ejemplos:http://localhost/WEB2-TPE2/api/grupos/6
+Responde con body = {
+        "id_grupo": 6,
+        "nombre": "A",
+        "finalizado": 1
+    }
 
 
 
@@ -142,7 +143,6 @@ Ejemplo:http://localhost/WEB2-TPE2/api/auth/token/
 
 headers: {
            'Authorization': 'Basic d2ViMjoxMjM0NTY='
-           'Content-Type': 'application/json'
        }
 
 
