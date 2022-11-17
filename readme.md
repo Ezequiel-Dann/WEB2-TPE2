@@ -1,10 +1,31 @@
-Cuentas para inicio de Sesion:
+## Esta api permite gestionar los equipos y grupos del mundial Qatar 2022
 
-Admin: 
-email: admin@admin.com contraseña:admin123
+### Estructura de los datos
 
-Usuario sin permisos:
-email: user@user.com contraseña:user123
+EQUIPOS
+    
+    {
+        id_equipo: int,
+        pais: string,
+        puntos: int,
+        pj: int,
+        pg: int,
+        pe: int,
+        pp: int,
+        gf: int,
+        gc: int,
+        dif: int,
+        fk_id_grupo: int
+    }
+
+GRUPOS
+
+    {
+        id_grupo:int,
+        nombre: string,
+        finalizado: boolean
+    }
+
 
 #    ENDPOINTS
 
@@ -16,23 +37,24 @@ Para utilizar este enpoint se necesita un token de auntenticacion OAuth2.0
 
 Los parametros opcionales que acepta son:
 
-* grupo: filtra los equipos por id de grupo, tiene que ser numero (id) 
-* sort: ordena por la columna especificada 
-* posibles columnas:
-* order: la direccion en la que se ordenan los registros. Tiene que ser asc o desc, si order esta presente pero sort no, el orden se hace de la siguiente manera:
-    1º puntos,
-    2º partidos ganados (pg),
-    3º partidos jugados (pj). los partidos jugados se ordenan de forma opuesta al resto,
-        porque cuanto mas partidos jugados tenga mas abajo es su posicion en la tabla,
-    4º goles a favor (gf),
-    5º diferencia de goles (dif)
+* **Grupo**: filtra los equipos por id de grupo, tiene que ser numero (id) 
+* **Sort**: ordena por la columna especificada :
+    * Pais, Puntos, PJ (partidos jugados), PG (partidos ganados), PE (partidos empatados), PP (partidos perdidos), GF (goles a favor), GC (goles en contra), Dif
+* **Order**: la direccion en la que se ordenan los registros. Tiene que ser asc o desc, si order esta presente pero sort no, el orden se hace de la siguiente manera:
+    
+    1. Puntos,
+    2. Partidos ganados (PG),
+    3. Partidos jugados (PJ). Los partidos jugados se ordenan de forma opuesta al resto,
+        porque cuanto mas partidos jugados tenga mas abajo es su posicion en la tabla.
+    4. Poles a favor (GF),
+    5. Diferencia de goles (Dif)
 
-* limit: tiene que ser un numero mayor estricto que 0 y menor igual a 10, cantidad de equipos en la respuesta.
-* offset: tiene que ser un numero mayor o igual a 0 y es obligacion tener un limit, cantidad de equipos a ignorar antes de empezar a obtener registros.
+* **Limit**: cantidad de equipos en la respuesta. Tiene que ser un numero mayor estricto que 0 y menor igual a 10.
+* **Offset**: cantidad de equipos a ignorar antes de empezar a obtener registros. Tiene que ser un numero mayor o igual a 0 y es obligacion tener un limit.
 
 
 Si la consulta es correcta este endpoint genera un arreglo de json con los datos de cada equipo,
-pais, puntos, pj(partidos jugados), pg(partidos ganados), pe(partidos empatados), pp(partidos perdidos), gf(goles a favor) ,gc(goles en contra) , dif
+
 
 ### Ejemplos
 > GET /api/equipos
@@ -93,6 +115,7 @@ pais, puntos, pj(partidos jugados), pg(partidos ganados), pe(partidos empatados)
         order: no
     }
 
+La respuesta contiene pares clave valor con los parametros invalidos
 
 > GET /api/equipos?sort=pais&order=DESC&limit=2&offset=1&grupo=7 
 
@@ -111,7 +134,7 @@ Si la consulta es correcta este endpoint genera un json con los datos de el equi
 ### Ejemplo
 > GET /api/equipos/7
 
-Respuesta
+    Respuesta
     Code: 200
     Content:
     {
@@ -142,7 +165,7 @@ Si esta accion se realiza correctamente devuelve el id del nuevo equipo ingresad
 >POST api/equipos
 
     Request
-    
+
     Body:
     {
         "pais": "argentina",
@@ -173,16 +196,16 @@ Si esta accion se realiza correctamente devuelve el id del nuevo equipo ingresad
 
     Body:
     {
-        pais: string,
-        puntos: int,
-        pj: int,
-        pg: int,
-        pe: int,
-        pp: int,
-        gf: int,
-        gc: int,
-        diferencia: int,
-        fk_id_grupo: int
+        'pais': string,
+        'puntos': int,
+        'pj': int,
+        'pg': int,
+        'pe': int,
+        'pp': int,
+        'gf': int,
+        'gc': int,
+        'diferencia': int,
+        'fk_id_grupo': int
     }
 
     Response
@@ -217,14 +240,14 @@ Si la consulta se realiza con exito devuelve un arreglo de json con todos los gr
 
     [
         {
-            id_grupo: int,
-            nombre: string,
-            finalizado: boolean (0/1)
+            'id_grupo': int,
+            'nombre': string,
+            'finalizado': boolean (0/1)
         },
         {
-            id_grupo: int,
-            nombre: string,
-            finalizado: boolean (0/1)
+            'id_grupo': int,
+            'nombre': string,
+            'finalizado': boolean (0/1)
         }
     ]
 
@@ -243,25 +266,42 @@ Si la consulta se realiza con exito devuelve un json de el grupo y su informacio
 
 
     {
-        id_grupo: 3,
-        nombre: string,
-        finalizado: boolean (0/1)
+        'id_grupo': 3,
+        'nombre': string,
+        'finalizado': boolean (0/1)
     }
 
-Ejemplos:http://localhost/WEB2-TPE2/api/grupos/6
-Responde con body = 
 
-    {
-        id_grupo: 6,
-        nombre: "A",
-        finalizado: 1
-    }
-
-### GET /auth/token
+## GET /auth/token
 
 Este endpoint requiere un header con el par email:contrasenia en base 64
-Ejemplo:http://localhost/WEB2-TPE2/api/auth/token/
+### Ejemplo
 
-headers: {
-           'Authorization': 'Basic d2ViMjoxMjM0NTY='
-       }
+    Headers: 
+    {
+        'Authorization': 'Basic d2ViMjoxMjM0NTY='
+    }
+
+Cuentas para generar token:
+
+Admin
+
+email: admin@admin.com 
+contraseña: admin123
+
+Usuario sin permisos
+
+email: user@user.com 
+contraseña: user123
+
+# AUTORIZACION
+
+
+El token de autorizacion debe ser incluido en un header Autorization con la palabra Bearer separada del token con un espacio
+
+### EJEMPLO
+
+    Headers:
+    {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImFkbWluIjoxLCJleHAiOjE2Njg3MzA5ODJ9.zg4PBzc-1d3rjH7rsnWxrH5bLZDUNrIUmEVAMrwcWS4'
+    }

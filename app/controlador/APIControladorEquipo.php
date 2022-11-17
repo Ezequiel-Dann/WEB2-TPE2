@@ -18,6 +18,7 @@ class APIControladorEquipo{
         $this->vista = new APIVista();
         $this->authHelper = new AuthApiHelper();
         define("CAMPOS",['pais','pp','puntos','pj','pe','gc','fk_id_grupo','pg','dif','gf']);
+        //Se puede hacer una consulta a la BD para obtener las columnas de la tabla
     }
 
     /*public function obtenerEquipo($params=null){
@@ -214,6 +215,7 @@ class APIControladorEquipo{
         }
 
         return $valido;
+
         /*return (
             isset($data->pp) and (!empty($data->pp) or $data->pp == "0") and is_numeric($data->pp) and
             isset($data->puntos) and (!empty($data->puntos) or $data->puntos == "0") and is_numeric($data->puntos) and
@@ -230,10 +232,7 @@ class APIControladorEquipo{
         
     }
     private function columnaValida($sort){
-        /*$columnas=['pais','pp','puntos','pj','pe','gc','grupo','pg','dif','gf'];
-        if(in_array($sort, $columnas)){
-            return true;
-        }*/
+
         if(in_array($sort,CAMPOS)){
             return true;
         }
