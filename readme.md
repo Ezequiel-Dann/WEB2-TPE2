@@ -5,10 +5,9 @@ email: admin@admin.com contraseña:admin123
 
 Usuario sin permisos:
 email: user@user.com contraseña:user123
+# DOCUMENTACION API
 
-                             DOCUMENTACION API
-
-    ENDPOINTS
+##    ENDPOINTS
 
 (1) listar todos los equipos ('equipos/' ,'GET'):
 Para utilizar este enpoint se necesita un token de auntenticacion OAuth2.0.
