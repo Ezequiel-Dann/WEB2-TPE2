@@ -331,12 +331,23 @@ class APIControladorEquipo{
 
     private function evaluaciones(){
         $evaluaciones = [];
-        $evaluaciones["limit"] = function ($limit){return ($limit > 0) and ($limit <= 10) and (is_numeric($limit));};
-        $evaluaciones["order"] = function ($order){return $this->esOrderValido(strtoupper($order));};
-        $evaluaciones["grupo"] = function ($grupo){return is_numeric($grupo);};
-        $evaluaciones["offset"] = function($offset){return $offset >= 0 and is_numeric($offset) and isset($_GET["limit"]);};
-        $evaluaciones["sort"] = function ($sort){return $this->columnaValida(strtolower($sort));};
-        $evaluaciones["resource"] = function($resource){return true;};
+        $evaluaciones["limit"] = function ($limit){
+            return ($limit > 0) and ($limit <= 10) and (is_numeric($limit));};
+
+        $evaluaciones["order"] = function ($order){
+            return $this->esOrderValido(strtoupper($order));};
+
+        $evaluaciones["grupo"] = function ($grupo){
+            return is_numeric($grupo);};
+
+        $evaluaciones["offset"] = function($offset){
+            return $offset >= 0 and is_numeric($offset) and isset($_GET["limit"]);};
+
+        $evaluaciones["sort"] = function ($sort){
+            return $this->columnaValida(strtolower($sort));};
+
+        $evaluaciones["resource"] = function($resource){
+            return true;};
 
         return $evaluaciones;
     }
