@@ -1,11 +1,6 @@
 <?php
 
-class APIVista {
-
-    public function __construct()
-    {
-        
-    }
+class vista{
 
     public function response($body, $status){
         header("Content-Type: application/json");
@@ -25,4 +20,7 @@ class APIVista {
         );
         return (isset($status[$code]))? $status[$code] : $status[500];
       }
+
 }
+
+?>
